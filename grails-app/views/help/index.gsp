@@ -42,5 +42,35 @@ $('.exceptions').before('<h3>Exceptions</h3>');
 	<code class="example">GET /annotate?lang=de</code>
 	<code class="example">GET /annotate?lang=en</code>
 	<div class="returns">JSON string of annotated content</div>
+
+<h2>Environment check</h2>
+
+After correcting environment errors, <b>make sure to restart the server</b>
+<ul>
+	<li>Configuration file:
+		<g:if test="${configurationFileExists}">
+			found
+		</g:if>
+		<g:else>
+			NOT FOUND at location <%=settings.grails.config.locations%>
+		</g:else>
+	</li>
+	<li>OpenCalais API Key:
+		<g:if test="${settings.ner.OpenCalais.apiKey}">
+			OK
+		</g:if>
+		<g:else>
+			NOT FOUND!!
+		</g:else>
+	</li>
+	<li>Alchemy API Key:
+		<g:if test="${settings.ner.Alchemy.apiKey}">
+			OK
+		</g:if>
+		<g:else>
+			NOT FOUND!!
+		</g:else>
+	</li>
+</ul>
 </body>
 </html>

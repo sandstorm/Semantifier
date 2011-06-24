@@ -22,5 +22,16 @@ package semantifier
 class HelpController {
 
     def index = {
+		def configurationFileExists = grailsApplication.config.grails.config.locations.any { fileName ->
+			def url = new URL(fileName)
+			try {
+				return (url.text.length() > 0)
+			} catch (FileNotFoundException e) {
+				return false
+			}
+		}
+		return [
+			settings: grailsApplication.config,
+			configurationFileExists: configurationFileExists]
     }
 }

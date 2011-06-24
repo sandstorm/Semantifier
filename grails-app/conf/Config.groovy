@@ -116,6 +116,6 @@ log4j = {
 
 // Custom Configuration
 ner {
-	OpenCalais.apiKey="your-api-key-here"
-	Alchemy.apiKey="your-api-key-here"
+	OpenCalais.apiKey="" // your-api-key-here
+	Alchemy.apiKey="" // your-api-key-here
 }
