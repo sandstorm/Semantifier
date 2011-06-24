@@ -31,24 +31,30 @@ class AnnotationService {
 	def languageClassifier
 
 	public def annotate(String text) {
-		def annotations = [];
-
 		def language = languageClassifier.classify(text);
+		def rawAnnotations = annotateText(text, language)
 
+		return [language: language, entities: processRawAnnotations(rawAnnotations)];
+	}
+
+	private def annotateText(def text, def language) {
+		def annotations = []
 		if (language == "en") {
 			annotations = openCalaisConnector.getAnnotations(text);
 		} else {
 			annotations = alchemyConnector.getAnnotations(text);
 		}
+		return annotations
+	}
 
+	private def processRawAnnotations(def rawAnnotations) {
 		def processedAnnotations = []
 
-		
-		def numberOfThreads = annotations.size()
+		def numberOfThreads = rawAnnotations.size()
 		if (numberOfThreads > 10) numberOfThreads = 10
 		
 		GParsPool.withPool(numberOfThreads) {
-			processedAnnotations = annotations.collectParallel { annotation ->
+			processedAnnotations = rawAnnotations.collectParallel { annotation ->
 				def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
 				def response = freebaseClient.get(query: [query: annotation.entity, limit:5, stemmed:1], contentType: JSON)
 	
@@ -57,15 +63,14 @@ class AnnotationService {
 					offset: annotation.offset,
 					length: annotation.length,
 					tag: annotation.mostLikelyTagName, // TODO: work with this one later, to refine freebase results.
-					disambiguration: processPossibleResults(response.data.result) // TODO: convert to linked data results
+					disambiguration: processPossibleFreebaseResults(response.data.result) // TODO: convert to linked data results
 				]
 			}
 		}
 
-		return [language: language, entities: processedAnnotations];
+		return processedAnnotations;
 	}
-
-	private def processPossibleResults(results) {
+	private def processPossibleFreebaseResults(results) {
 		def possibleResults = [];
 
 			// No results found, so we return the empty result list.
