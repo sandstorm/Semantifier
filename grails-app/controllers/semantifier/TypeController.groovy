@@ -1,6 +1,6 @@
 package semantifier
 
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -19,10 +19,19 @@ package semantifier
  * along with Semantifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * This controller is responsible to do type-related lookups into the appropriate schema.
+ */
 class TypeController {
 
-    def typeCheckerService
+	/**
+	 * The type checker service doing the actual work
+	 */
+    TypeCheckerService typeCheckerService
 
+	/**
+	 * Return string "true" if the given URI is a literal type, false otherwise
+	 */
     def isLiteral = {
     	render typeCheckerService.isUriALiteralType(params.path)
     }

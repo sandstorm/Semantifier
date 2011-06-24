@@ -1,6 +1,6 @@
 package semantifier
 
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -23,9 +23,19 @@ import java.awt.GraphicsConfiguration.DefaultBufferCapabilities;
 
 import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER;
 
+/**
+ * Controller responsible for annotating text.
+ */
 class AnnotateController {
-	def annotationService
+	
+	/**
+	 * The annotation service doing the actual annotation work.
+	 */
+	AnnotationService annotationService
 
+	/**
+	 * Index action, which submits hardcoded texts right now, and returns JSON results.
+	 */
     def index = {
 		def text;
 		

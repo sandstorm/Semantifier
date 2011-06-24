@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -129,7 +129,7 @@ ner {
 		disambigruationOrder = "freebase,sindice"
 		freebase {
 			tagMapping {
-				// MAPPING from OpenCalais to Freebase terms
+				// MAPPING from OpenCalais to Freebase terms, used to refine search results.
 //				Anniversary = ""
 				City = "/location/citytown"
 				Company = "/business/business_operation"

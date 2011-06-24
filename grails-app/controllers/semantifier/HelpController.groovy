@@ -1,6 +1,6 @@
 package semantifier
 
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -19,6 +19,9 @@ package semantifier
  * along with Semantifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * controller responsible for showing the help screen.
+ */
 class HelpController {
 
     def index = {

@@ -1,6 +1,6 @@
 package semantifier
 
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -27,6 +27,14 @@ import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER
 import ws.palladian.extraction.entity.ner.tagger.AlchemyNER
 import ws.palladian.classification.language.LanguageClassifier
 
+
+/**
+ * Service which can do annotation of longer text. This annotation happens in multiple steps:
+ * <ol><li>Find out the language of the input text</li>
+ * <li>Determine the NER service to use using <tt>ner.annotation.languageToNerServiceMapping</tt>, and call this NER service.</li>
+ * <li>Then, use the disambiguration services in the order specified by <tt>ner.disambiguration.disambigruationOrder</tt>. The first returned results will be used.</li>
+ * </ol>
+ */
 class AnnotationService {
 
 	def grailsApplication
@@ -39,6 +47,12 @@ class AnnotationService {
 	AbstractDisambigurator freebaseDisambiguratorService
 	AbstractDisambigurator sindiceDisambiguratorService
 
+	/**
+	 * Annotate the given text.
+	 *
+	 * @param text
+	 * @return Map
+	 */
 	public def annotate(String text) {
 		def language = languageClassifier.classify(text);
 		Annotations rawAnnotations = doNamedEntityRecognition(text, language)
@@ -46,6 +60,12 @@ class AnnotationService {
 		return [language: language, entities: disambigurateRawAnnotations(rawAnnotations)];
 	}
 
+	/**
+	 * Do named entity recognition, based on the language. 
+	 * @param text
+	 * @param language
+	 * @return Annotations the annotations found
+	 */
 	private Annotations doNamedEntityRecognition(def text, def language) {
 		Annotations annotations = []
 		def languageToNerServiceMapping = grailsApplication.config.ner.annotation.languageToNerServiceMapping
@@ -63,6 +83,12 @@ class AnnotationService {
 		return annotations
 	}
 
+	/**
+	 * Disambigurate the raw annotations in a multi-threaded way.
+	 * 
+	 * @param rawAnnotations
+	 * @return Map annotations
+	 */
 	private def disambigurateRawAnnotations(Annotations rawAnnotations) {
 		def processedAnnotations = []
 
@@ -77,6 +103,12 @@ class AnnotationService {
 		return processedAnnotations;
 	}
 	
+	/**
+	 * Helper function which should disambigurate a single annotation.
+	 *
+	 * @param annotation
+	 * @return Map disambigurated annotation, if successful.
+	 */
 	private def disambigurateSingleAnnotation(Annotation annotation) {
 		for (String disambiguratorName in grailsApplication.config.ner.disambiguration.disambigruationOrder.tokenize(',')) {
 			AbstractDisambigurator currentDisambigurator = null;

@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Semantifier.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+ /**
+  * Application bootstrap from Grails. We do not use this so far.
+  */
 class BootStrap {
 
     def init = { servletContext ->

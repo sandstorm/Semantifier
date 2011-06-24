@@ -1,6 +1,6 @@
 package semantifier
 
-/**
+/*
  * This file is part of "Semantifier".
  *
  * Copyright 2011 Sebastian Kurfürst
@@ -22,9 +22,18 @@ package semantifier
 import com.hp.hpl.jena.ontology.*
 import com.hp.hpl.jena.rdf.model.ModelFactory
 
-class TypeCheckerService {
 
-    // TODO: Wrong behavior at http://xmlns.com/foaf/0.1/givenName for example (is a literal, but does not say so... we need some fallback there maybe?)
+/**
+ * Do some type inference checking
+ */
+class TypeCheckerService {
+	
+	/**
+	 * TODO: Wrong behavior at http://xmlns.com/foaf/0.1/givenName for example (is a literal, but does not say so... we need some fallback there maybe?)
+	 *
+	 * @param uri
+	 * @return TRUE if result is a literal type, FALSE otherwise.
+	 */
 	public boolean isUriALiteralType(String uri) {
 		OntModel model = ModelFactory.createOntologyModel( OntModelSpec.OWL_MEM, null )
 
