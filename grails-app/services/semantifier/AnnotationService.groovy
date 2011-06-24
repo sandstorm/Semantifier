@@ -8,6 +8,7 @@ import static groovyx.net.http.ContentType.JSON
 class AnnotationService {
 
 	def openCalaisConnector
+	def alchemyConnector
 	def languageClassifier
 
 	public def annotate(String text) {
@@ -18,7 +19,7 @@ class AnnotationService {
 		if (language == "en") {
 			annotations = openCalaisConnector.getAnnotations(text);
 		} else {
-			//annotations = alchemyConnector.getAnnotations(text);
+			annotations = alchemyConnector.getAnnotations(text);
 		}
 
 		def processedAnnotations = []

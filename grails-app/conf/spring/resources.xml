@@ -8,9 +8,9 @@
 		<constructor-arg index="0" value="${ner.OpenCalais.apiKey}" />
 	</bean>
 
-<!--	<bean id="alchemyConnector" class="ws.palladian.extraction.entity.ner.tagger.AlchemyNER">
+	<bean id="alchemyConnector" class="ws.palladian.extraction.entity.ner.tagger.AlchemyNER">
 		<constructor-arg index="0" value="${ner.Alchemy.apiKey}" />
-	</bean>-->
+	</bean>
 
 	<bean id="languageClassifier" class="ws.palladian.classification.language.TagTheNetLangDetect">
 	</bean>
