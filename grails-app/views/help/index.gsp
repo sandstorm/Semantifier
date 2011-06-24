@@ -34,7 +34,7 @@ $('.exceptions').before('<h3>Exceptions</h3>');
 &copy; 2011 Sebastian Kurf&uuml;rst
 
 <h2>/type/isLiteral/[fullyQualifiedUri]</h2>
-	<code class="example">GET /type/isLiteral/http://xmlns.com/foaf/0.1/givenName</code>
+	<code class="example">GET <a href="/semantifier/type/isLiteral/http://xmlns.com/foaf/0.1/givenName">/type/isLiteral/http://xmlns.com/foaf/0.1/givenName</a></code>
 	<div class="returns">string <code>true</code> or <code>false</code>. <code>true</code> if resource is a literal, <code>false</code> otherwise.</div>
 	<div class="exceptions">404 if <code>fullyQualifiedUri</code> does not point to a resource.
 

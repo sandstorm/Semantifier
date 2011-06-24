@@ -19,12 +19,16 @@
  class UrlMappings {
 
 	static mappings = {
+		"/type/isLiteral/$path**" {
+			controller = "type"
+			action = "isLiteral"
+		}
 		"/$controller/$action?/$id?"{
 			constraints {
 				// apply constraints here
 			}
 		}
-
+		
 		"/"(view:"/index")
 		"500"(view:'/error')
 	}
