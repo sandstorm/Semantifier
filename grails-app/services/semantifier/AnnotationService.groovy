@@ -22,6 +22,7 @@ package semantifier
 import groovyx.net.http.RESTClient
 import net.sf.json.JSONNull
 import static groovyx.net.http.ContentType.JSON
+import groovyx.gpars.GParsPool
 
 class AnnotationService {
 
@@ -42,19 +43,23 @@ class AnnotationService {
 
 		def processedAnnotations = []
 
-
-		def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
-
-		annotations.each { annotation ->
-			def response = freebaseClient.get(query: [query: annotation.entity, limit:5], contentType: JSON)
-
-			processedAnnotations << [
-				entity: annotation.entity,
-				offset: annotation.offset,
-				length: annotation.length,
-				tag: annotation.mostLikelyTagName, // TODO: work with this one later, to refine freebase results.
-				disambiguration: processPossibleResults(response.data.result) // TODO: convert to linked data results
-			]
+		
+		def numberOfThreads = annotations.size()
+		if (numberOfThreads > 10) numberOfThreads = 10
+		
+		GParsPool.withPool(numberOfThreads) {
+			processedAnnotations = annotations.collectParallel { annotation ->
+				def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
+				def response = freebaseClient.get(query: [query: annotation.entity, limit:5, stemmed:1], contentType: JSON)
+	
+				return [
+					entity: annotation.entity,
+					offset: annotation.offset,
+					length: annotation.length,
+					tag: annotation.mostLikelyTagName, // TODO: work with this one later, to refine freebase results.
+					disambiguration: processPossibleResults(response.data.result) // TODO: convert to linked data results
+				]
+			}
 		}
 
 		return [language: language, entities: processedAnnotations];
