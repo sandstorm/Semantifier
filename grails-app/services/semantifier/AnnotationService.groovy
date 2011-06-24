@@ -35,7 +35,9 @@ class AnnotationService {
 	
 	OpenCalaisNER openCalaisConnector
 	AlchemyNER alchemyConnector
-	FreebaseDisambiguratorService freebaseDisambiguratorService
+	
+	AbstractDisambigurator freebaseDisambiguratorService
+	AbstractDisambigurator sindiceDisambiguratorService
 
 	public def annotate(String text) {
 		def language = languageClassifier.classify(text);
@@ -81,6 +83,9 @@ class AnnotationService {
 			switch (disambiguratorName) {
 				case 'freebase':
 					currentDisambigurator = freebaseDisambiguratorService
+					break
+				case 'sindice':
+					currentDisambigurator = sindiceDisambiguratorService
 					break
 				default:
 					throw new RuntimeException("TODO: disambigurator '${disambiguratorName}' not found")

@@ -126,13 +126,13 @@ ner {
 		}
 	}
 	disambiguration {
-		disambigruationOrder = "freebase"
+		disambigruationOrder = "freebase,sindice"
 		freebase {
 			tagMapping {
 				// MAPPING from OpenCalais to Freebase terms
 //				Anniversary = ""
 				City = "/location/citytown"
-				Company = "/business/business_corporation"
+				Company = "/business/business_operation"
 				Continent = "/location/continent"
 				Country = "/location/country"
 //				Currency = ""

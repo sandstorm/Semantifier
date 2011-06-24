@@ -11,8 +11,15 @@ class FreebaseDisambiguratorService extends AbstractDisambigurator {
 	
 	public def disambigurate(Annotation annotation) {
 		def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
-		println annotation.mostLikelyTagName
-		def response = freebaseClient.get(query: [query: annotation.entity, limit:5, stemmed:1], contentType: JSON)
+		def query = [query: annotation.entity, limit:5, stemmed:1]
+		
+		if (annotation.mostLikelyTagName && grailsApplication.config.ner.disambiguration.freebase.tagMapping[annotation.mostLikelyTagName]) {
+			query['type'] = grailsApplication.config.ner.disambiguration.freebase.tagMapping[annotation.mostLikelyTagName]
+			// TODO: decide whether query type should be accounted for in all cases or not...
+			// query['type_strict'] = 'should' // give preference to matching types, but do not include other types.
+		}
+		
+		def response = freebaseClient.get(query: query, contentType: JSON)
 		return processPossibleFreebaseResults(response.data.result)
 	}
 	
