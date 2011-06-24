@@ -18,15 +18,22 @@ grails.project.dependency.resolution = {
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
         //mavenCentral()
-        //mavenLocal()
+        mavenLocal()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
-        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
+		compile('com.hp.hpl.jena:jena:2.6.4') {
+			excludes 'slf4j-log4j12', 'log4j', 'slf4j-api'
+		}
 
+
+		compile('ws.palladian:palladian:0.8-SNAPSHOT') {
+			 excludes "log4j", "stax", "jaxen", "weka", "lucene-core", "lucene-memory", "lucene-analyzers", "rome", "lingpipe", "junit", "xml-apis", "xercesImpl", "trove", "twitter4j-core", "prefuse", "bonecp", "snakeyaml", "jwbf", "boilerpipe", "nekohtml", "mysql-connector-java", "commons-validator", "h2", "commons-configuration", "slf4j-api"
+		}
+		compile('commons-configuration:commons-configuration:1.6')
         // runtime 'mysql:mysql-connector-java:5.1.5'
     }
 
