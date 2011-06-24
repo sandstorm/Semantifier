@@ -1,7 +1,30 @@
+/**
+ * This file is part of "Semantifier".
+ *
+ * Copyright 2011 Sebastian Kurfürst
+ *
+ * Semantifier is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Semantifier is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Semantifier.  If not, see <http://www.gnu.org/licenses/>.
+ */
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
-// grails.config.locations = [ "classpath:${appName}-config.properties",
+grails.config.locations = ["file:${userHome}/.grails/${appName}-config.groovy"]
+if(System.properties["${appName}.config.location"]) {
+	grails.config.locations << "file:" + System.properties["${appName}.config.location"]
+}
+
+//"classpath:${appName}-config.properties",
 //                             "classpath:${appName}-config.groovy",
 //                             "file:${userHome}/.grails/${appName}-config.properties",
 //                             "file:${userHome}/.grails/${appName}-config.groovy"]
@@ -87,10 +110,11 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
-    debug 'ws'
+    debug  'ws'
     //debug 'org', 'com', 'net', 'ws'
 }
 
+// Custom Configuration
 ner {
 	OpenCalais.apiKey="your-api-key-here"
 	Alchemy.apiKey="your-api-key-here"
