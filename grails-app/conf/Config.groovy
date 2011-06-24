@@ -87,4 +87,11 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+    debug 'ws'
+    //debug 'org', 'com', 'net', 'ws'
+}
+
+ner {
+	OpenCalais.apiKey="your-api-key-here"
+	Alchemy.apiKey="your-api-key-here"
 }
