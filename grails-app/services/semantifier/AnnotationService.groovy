@@ -29,20 +29,28 @@ class AnnotationService {
 	def openCalaisConnector
 	def alchemyConnector
 	def languageClassifier
+	def grailsApplication
 
 	public def annotate(String text) {
 		def language = languageClassifier.classify(text);
-		def rawAnnotations = annotateText(text, language)
+		def rawAnnotations = doNamedEntityRecognition(text, language)
 
 		return [language: language, entities: processRawAnnotations(rawAnnotations)];
 	}
 
-	private def annotateText(def text, def language) {
+	private def doNamedEntityRecognition(def text, def language) {
 		def annotations = []
-		if (language == "en") {
-			annotations = openCalaisConnector.getAnnotations(text);
-		} else {
-			annotations = alchemyConnector.getAnnotations(text);
+		def languageToNerServiceMapping = grailsApplication.config.ner.annotation.languageToNerServiceMapping
+		def annotator = languageToNerServiceMapping[language]
+		switch(annotator) {
+			case 'OpenCalais':
+				annotations = openCalaisConnector.getAnnotations(text)
+				break
+			case 'Alchemy':
+				annotations = alchemyConnector.getAnnotations(text)
+				break
+			default:
+				throw new RuntimeException("no annotator found for language " + language)
 		}
 		return annotations
 	}

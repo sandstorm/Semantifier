@@ -39,8 +39,8 @@ $('.exceptions').before('<h3>Exceptions</h3>');
 	<div class="exceptions">404 if <code>fullyQualifiedUri</code> does not point to a resource.
 
 <h2>/annotate</h2>
-	<code class="example">GET /annotate?lang=de</code>
-	<code class="example">GET /annotate?lang=en</code>
+	<code class="example">GET <a href="/semantifier/annotate?lang=de">/annotate?lang=de</a></code>
+	<code class="example">GET <a href="/semantifier/annotate?lang=en">/annotate?lang=en</a></code>
 	<div class="returns">JSON string of annotated content</div>
 
 <h2>Environment check</h2>
@@ -70,6 +70,10 @@ After correcting environment errors, <b>make sure to restart the server</b>
 		<g:else>
 			NOT FOUND!!
 		</g:else>
+	</li>
+	
+	<li>Language classifier class:
+	<%=settings.ner.annotation.languageClassifier %>
 	</li>
 </ul>
 </body>

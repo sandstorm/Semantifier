@@ -118,4 +118,11 @@ log4j = {
 ner {
 	OpenCalais.apiKey="" // your-api-key-here
 	Alchemy.apiKey="" // your-api-key-here
+	
+	annotation {
+		languageToNerServiceMapping {
+			de = "Alchemy"
+			en = "OpenCalais"
+		}
+	}
 }
