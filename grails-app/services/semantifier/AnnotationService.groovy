@@ -19,27 +19,33 @@ package semantifier
  * along with Semantifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import groovyx.net.http.RESTClient
-import net.sf.json.JSONNull
-import static groovyx.net.http.ContentType.JSON
 import groovyx.gpars.GParsPool
+import semantifier.disambigurator.*
+import ws.palladian.extraction.entity.ner.Annotation
+import ws.palladian.extraction.entity.ner.Annotations
+import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER
+import ws.palladian.extraction.entity.ner.tagger.AlchemyNER
+import ws.palladian.classification.language.LanguageClassifier
 
 class AnnotationService {
 
-	def openCalaisConnector
-	def alchemyConnector
-	def languageClassifier
 	def grailsApplication
+	
+	LanguageClassifier languageClassifier
+	
+	OpenCalaisNER openCalaisConnector
+	AlchemyNER alchemyConnector
+	FreebaseDisambiguratorService freebaseDisambiguratorService
 
 	public def annotate(String text) {
 		def language = languageClassifier.classify(text);
-		def rawAnnotations = doNamedEntityRecognition(text, language)
+		Annotations rawAnnotations = doNamedEntityRecognition(text, language)
 
-		return [language: language, entities: processRawAnnotations(rawAnnotations)];
+		return [language: language, entities: disambigurateRawAnnotations(rawAnnotations)];
 	}
 
-	private def doNamedEntityRecognition(def text, def language) {
-		def annotations = []
+	private Annotations doNamedEntityRecognition(def text, def language) {
+		Annotations annotations = []
 		def languageToNerServiceMapping = grailsApplication.config.ner.annotation.languageToNerServiceMapping
 		def annotator = languageToNerServiceMapping[language]
 		switch(annotator) {
@@ -55,7 +61,7 @@ class AnnotationService {
 		return annotations
 	}
 
-	private def processRawAnnotations(def rawAnnotations) {
+	private def disambigurateRawAnnotations(Annotations rawAnnotations) {
 		def processedAnnotations = []
 
 		def numberOfThreads = rawAnnotations.size()
@@ -63,44 +69,40 @@ class AnnotationService {
 		
 		GParsPool.withPool(numberOfThreads) {
 			processedAnnotations = rawAnnotations.collectParallel { annotation ->
-				def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
-				def response = freebaseClient.get(query: [query: annotation.entity, limit:5, stemmed:1], contentType: JSON)
+				return disambigurateSingleAnnotation(annotation);
+			}
+		}
+		return processedAnnotations;
+	}
 	
+	private def disambigurateSingleAnnotation(Annotation annotation) {
+		for (String disambiguratorName in grailsApplication.config.ner.disambiguration.disambigruationOrder.tokenize(',')) {
+			AbstractDisambigurator currentDisambigurator = null;
+			switch (disambiguratorName) {
+				case 'freebase':
+					currentDisambigurator = freebaseDisambiguratorService
+					break
+				default:
+					throw new RuntimeException("TODO: disambigurator '${disambiguratorName}' not found")
+			}
+			def disambigurationResult = currentDisambigurator.disambigurate(annotation)
+			if (disambigurationResult != null) {
+					// The first disambiguration result "wins".
 				return [
 					entity: annotation.entity,
 					offset: annotation.offset,
 					length: annotation.length,
-					tag: annotation.mostLikelyTagName, // TODO: work with this one later, to refine freebase results.
-					disambiguration: processPossibleFreebaseResults(response.data.result) // TODO: convert to linked data results
+					disambiguration: disambigurationResult
 				]
 			}
 		}
 
-		return processedAnnotations;
-	}
-	private def processPossibleFreebaseResults(results) {
-		def possibleResults = [];
-
-			// No results found, so we return the empty result list.
-		if (!results) return [];
-
-		results.each { result ->
-			if (!result) return;
-			if (result.class == JSONNull.class) return;
-
-			def possibleSingleResult = [
-				id: 'http://rdf.freebase.com/ns' + result.id,
-				name: result.name,
-				relevanceScore: result['relevance:score']
-			]
-
-			if (result.image && result.image.class != JSONNull.class) {
-				possibleSingleResult.imageThumbnailUri = 'http://api.freebase.com/api/trans/image_thumb' + result.image.id
-			}
-
-			possibleResults << possibleSingleResult
-		}
-
-		return possibleResults
+			// Fallback: No disambigurator has found anything
+		return [
+			entity: annotation.entity,
+			offset: annotation.offset,
+			length: annotation.length,
+			disambiguration: []
+		]
 	}
 }

@@ -125,4 +125,51 @@ ner {
 			en = "OpenCalais"
 		}
 	}
+	disambiguration {
+		disambigruationOrder = "freebase"
+		freebase {
+			tagMapping {
+				// MAPPING from OpenCalais to Freebase terms
+//				Anniversary = ""
+				City = "/location/citytown"
+				Company = "/business/business_corporation"
+				Continent = "/location/continent"
+				Country = "/location/country"
+//				Currency = ""
+//				EmailAddress = ""
+//				EntertainmentAwardEvent = ""
+//				Facility = ""
+//				FaxNumber = ""
+				Holiday = "/time/holiday"
+//				IndustryTerm = ""
+				MarketIndex = "/finance/market_index"
+				MedicalCondition = "/medicine/disease"
+				MedicalTreatment = "/medicine/medical_treatment"
+				Movie = "/film/film"
+				MusicAlbum = "/music/album"
+				MusicGroup = "/music/artist"
+//				NaturalFeature = ""
+				OperatingSystem = "/computer/operating_system"
+				Organization = "/organization/organization"
+				Person = "/people/person"
+				PhoneNumber = "/common/phone_number"
+//				PoliticalEvent = ""
+//				Position = ""
+				Product = "/business/consumer_product"
+				ProgrammingLanguage = "/computer/programming_language"
+				ProvinceOrState = "/location/administrative_division"
+//				PublishedMedium = ""
+				RadioProgram = "/radio/radio_program"
+				RadioStation = "/broadcast/radio_station"
+				Region = "/location/region"
+//				SportsEvent = ""
+//				SportsGame = ""
+//				SportsLeague = ""
+//				Technology = ""
+//				TVShow = ""
+//				TVStation = ""
+//				URL = ""
+			}
+		}
+	}
 }
