@@ -46,6 +46,7 @@ class AnnotationService {
 	
 	AbstractDisambigurator freebaseDisambiguratorService
 	AbstractDisambigurator sindiceDisambiguratorService
+	AbstractDisambigurator dbpediaDisambiguratorService
 
 	/**
 	 * Annotate the given text.
@@ -119,6 +120,9 @@ class AnnotationService {
 				case 'sindice':
 					currentDisambigurator = sindiceDisambiguratorService
 					break
+				case 'dbpedia':
+					currentDisambigurator = dbpediaDisambiguratorService
+					break
 				default:
 					throw new RuntimeException("TODO: disambigurator '${disambiguratorName}' not found")
 			}
@@ -129,6 +133,8 @@ class AnnotationService {
 					entity: annotation.entity,
 					offset: annotation.offset,
 					length: annotation.length,
+					mostLikelyTagName: annotation.mostLikelyTagName,
+					disambigurator: disambiguratorName,
 					disambiguration: disambigurationResult
 				]
 			}

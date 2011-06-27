@@ -33,6 +33,7 @@ $('.exceptions').before('<h3>Exceptions</h3>');
 
 &copy; 2011 Sebastian Kurf&uuml;rst
 
+<h1>API Usage</h1>
 <h2>/type/isLiteral/[fullyQualifiedUri]</h2>
 	<code class="example">GET <a href="/semantifier/type/isLiteral/http://xmlns.com/foaf/0.1/givenName">/type/isLiteral/http://xmlns.com/foaf/0.1/givenName</a></code>
 	<div class="returns">string <code>true</code> or <code>false</code>. <code>true</code> if resource is a literal, <code>false</code> otherwise.</div>
@@ -43,9 +44,10 @@ $('.exceptions').before('<h3>Exceptions</h3>');
 	<code class="example">GET <a href="/semantifier/annotate?lang=en">/annotate?lang=en</a></code>
 	<div class="returns">JSON string of annotated content</div>
 
-<h2>Environment check</h2>
+<h1>Environment check</h1>
 
 After correcting environment errors, <b>make sure to restart the server</b>
+
 <ul>
 	<li>Configuration file:
 		<g:if test="${configurationFileExists}">
@@ -71,10 +73,8 @@ After correcting environment errors, <b>make sure to restart the server</b>
 			NOT FOUND!!
 		</g:else>
 	</li>
-	
-	<li>Language classifier class:
-	<%=settings.ner.annotation.languageClassifier %>
-	</li>
 </ul>
+
+<h1>Backend Server check</h1>
 </body>
 </html>

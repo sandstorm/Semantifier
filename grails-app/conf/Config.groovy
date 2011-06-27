@@ -126,7 +126,7 @@ ner {
 		}
 	}
 	disambiguration {
-		disambigruationOrder = "freebase,sindice"
+		disambigruationOrder = "dbpedia,freebase,sindice"
 		freebase {
 			tagMapping {
 				// MAPPING from OpenCalais to Freebase terms, used to refine search results.
@@ -168,6 +168,50 @@ ner {
 //				Technology = ""
 //				TVShow = ""
 //				TVStation = ""
+//				URL = ""
+			}
+		}
+		dbpedia {
+			tagMapping {
+				// MAPPING from OpenCalais to dbpedia ontology terms, used to refine search results.
+//				Anniversary = ""
+				City = "City"
+				Company = "Company"
+				Continent = "Continent"
+				Country = "Country"
+//				Currency = "Currency"
+//				EmailAddress = ""
+				EntertainmentAwardEvent = "Event"
+//				Facility = ""
+//				FaxNumber = ""
+//				Holiday = ""
+//				IndustryTerm = ""
+//				MarketIndex = ""
+				MedicalCondition = "Disease"
+				MedicalTreatment = "Drug"
+				Movie = "Film"
+				MusicAlbum = "Album"
+				MusicGroup = "MusicalArtist"
+				NaturalFeature = "NaturalPlace"
+//				OperatingSystem = ""
+				Organization = "Organization"
+				Person = "Person"
+//				PhoneNumber = ""
+//				PoliticalEvent = ""
+//				Position = ""
+//				Product = ""
+				ProgrammingLanguage = "ProgrammingLanguage"
+//				ProvinceOrState = ""
+//				PublishedMedium = ""
+//				RadioProgram = ""
+				RadioStation = "RadioStation"
+				Region = "AdministrativeRegion"
+				SportsEvent = "SportsEvent"
+//				SportsGame = ""
+				SportsLeague = "SportsLeague"
+//				Technology = ""
+				TVShow = "TelevisionShow"
+				TVStation = "TelevisionStation"
 //				URL = ""
 			}
 		}
