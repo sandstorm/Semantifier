@@ -38,6 +38,7 @@ import ws.palladian.classification.language.LanguageClassifier
 class AnnotationService {
 
 	def grailsApplication
+	def learningNerService
 
 	LanguageClassifier languageClassifier
 
@@ -62,10 +63,14 @@ class AnnotationService {
 	 */
 	private Annotations doNamedEntityRecognition(def text, def language) {
 		Annotations annotations = []
+		if (grailsApplication.config.ner.annotation.learning) {
+			annotations.addAll(learningNerService.getAnnotations(text))
+		}
 		def languageToNerServiceMapping = grailsApplication.config.ner.annotation.languageToNerServiceMapping
 		def nerName = languageToNerServiceMapping[language]
 		def ner = grailsApplication.mainContext.getBean(nerName)
-		return ner.getAnnotations(text)
+		annotations.addAll(ner.getAnnotations(text))
+		return annotations
 	}
 
 	/**

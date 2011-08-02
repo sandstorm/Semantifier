@@ -65,6 +65,7 @@ class LearningNerService {
 				file << token
 				file << "\t"
 				if (entity.name.contains(token)) {
+					// TODO: the check above is not very nice -> better idea: generate XML format and parse this?
 					file << entity.type
 				} else {
 					file << "0"

@@ -120,10 +120,10 @@ ner {
 	Alchemy.apiKey="" // your-api-key-here
 	
 	annotation {
+		learning = true
 		languageToNerServiceMapping {
 			de = "alchemyNer"
-			//en = "openCalaisNer"
-			en = "learningNerService"
+			en = "openCalaisNer"
 		}
 	}
 	linkification {
