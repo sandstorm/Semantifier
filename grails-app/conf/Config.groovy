@@ -215,5 +215,11 @@ ner {
 //				URL = ""
 			}
 		}
+		sindice {
+			tagMapping {
+				// MAPPING from OpenCalais to RDF Types, used to refine search results
+				Person = "http://xmlns.com/foaf/0.1/Person"
+			}
+		}
 	}
 }

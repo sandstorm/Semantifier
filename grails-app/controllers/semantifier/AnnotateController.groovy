@@ -22,7 +22,7 @@ package semantifier
 import java.awt.GraphicsConfiguration.DefaultBufferCapabilities;
 
 import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER;
-
+import semantifier.disambigurator.SindiceDisambiguratorService;
 /**
  * Controller responsible for annotating text.
  */
@@ -32,6 +32,11 @@ class AnnotateController {
 	 * The annotation service doing the actual annotation work.
 	 */
 	AnnotationService annotationService
+	
+	LearningNerService learningNerService
+	
+	// TODO: Only for debugging
+	SindiceDisambiguratorService sindiceDisambiguratorService
 
 	/**
 	 * Index action, which submits hardcoded texts right now, and returns JSON results.
@@ -53,4 +58,19 @@ class AnnotateController {
     		annotatedText
     	}
     }
+    
+    /**
+     * Learn a given annotation
+     */
+    def learn = {
+    	learningNerService.learn();
+    	render("learning stuff")
+    }
+	
+	def sindiceTest = {
+		def result = sindiceDisambiguratorService.getEntityUrlForDocument('http://sebastian.kurfuerst.eu/index.rdf', 'http://xmlns.com/foaf/0.1/Person')
+		render(contentType:"text/json") {
+			[foo: 'bar']
+		}
+	}
 }

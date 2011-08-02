@@ -23,35 +23,60 @@ import ws.palladian.extraction.entity.ner.Annotation
 import groovyx.net.http.RESTClient
 import net.sf.json.JSONNull
 import static groovyx.net.http.ContentType.JSON
-
+import com.hp.hpl.jena.rdf.model.Model
+import com.hp.hpl.jena.rdf.model.ModelFactory
 
 /**
  * Disambiguration service using sindice. Mostly useful for people who are not on Freebase, but on the semantic web.
  */
 class SindiceDisambiguratorService extends AbstractDisambigurator {
-	//def grailsApplication
+	def grailsApplication
 	
 	public def disambigurate(Annotation annotation) {
 		def sindiceClient = new RESTClient('http://api.sindice.com/v2/search')
+
+		def queryString = annotation.entity
+		def rdfType = null
 		
-		// TODO: evaluate type, i.e. if type is "Person", append foaf:Person to the search query
-		// TODO: Figure out the actual linked data URI INSTEAD OF document URI (i.e. http://sebastian.kurfuerst.eu/ instead of http://sebastian.kurfuerst.eu/index.rdf)
-		def query = [q: annotation.entity, page: 1, qt: 'term']
+		if (annotation.mostLikelyTagName && grailsApplication.config.ner.disambiguration.sindice.tagMapping[annotation.mostLikelyTagName]) {
+			rdfType = grailsApplication.config.ner.disambiguration.sindice.tagMapping[annotation.mostLikelyTagName]
+			queryString += ' ' + rdfType
+		}
+		println queryString 
+		def query = [q: queryString, page: 1, qt: 'term']
 		
 		def response = sindiceClient.get(query: query, contentType: JSON)
-		return processPossibleSindiceResults(response.data.entries)
+		return processPossibleSindiceResults(response.data.entries, rdfType)
 	}
 	
-	private def processPossibleSindiceResults(results) {
+	private def processPossibleSindiceResults(results, rdfType) {
 			// No results found, so we return null
 		if (!results) return null;
 
 		return results.collect { result ->
-			def possibleSingleResult = [
-				id: result.link,
+			return [
+				id: getEntityUrlForDocument(result.link, rdfType),
 				name: result.title[0]
 			]
-			return possibleSingleResult
 		}
+	}
+
+	public def getEntityUrlForDocument(String documentUrl, String rdfType) {
+		// Graceful fallback if rdfType is not given.
+		if (!rdfType) return documentUrl;
+
+		def sindiceLiveClient = new RESTClient('http://api.sindice.com/v3/cache')
+		def query = [url: documentUrl]
+		def response = sindiceLiveClient.get(query: query, contentType: JSON)
+		
+		// create an empty model
+		Model model = ModelFactory.createDefaultModel();
+
+		response.data[documentUrl].explicit_content.each { tripleString ->
+			model.read(new StringBufferInputStream(tripleString), null, "N-TRIPLE")
+		}
+
+		def firstStatement = model.listStatements(null, model.createProperty('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'type'), model.createResource(rdfType)).next()
+		return firstStatement.subject.toString()
 	}
 }
