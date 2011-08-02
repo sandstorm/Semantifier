@@ -2,6 +2,7 @@ package semantifier
 
 import ws.palladian.extraction.entity.ner.Annotations
 import ws.palladian.extraction.entity.ner.tagger.PalladianNer
+import ws.palladian.helper.nlp.Tokenizer;
 
 /*
  * This file is part of "Semantifier".
@@ -46,16 +47,34 @@ class LearningNerService {
 		}
 	}
 	public Annotations getAnnotations(String text) {
-		return palladianNer.getAnnotations(text)
+		def annotations = palladianNer.getAnnotations(text)
+		println annotations
+		return annotations
 	}
 	public void rebuild() {
-		return; // TODO: remove this one...
 		def newPalladianNer = createNer()
 		
-		// Learn palladianNER the following facts: "type", "entityString", "surrounding"
+		File file = new File("/tmp/ner_training.txt")
 		
-		newPalladianNer.train(trainingPath, "/tmp/nerModel_1")
-
+		// Learn palladianNER the following facts: "type", "entityString", "sourceText"
+		LearnedEntity.findAll().each { entity ->
+			def tokens = Tokenizer.tokenize(entity.sourceText)
+			println(entity.sourceText);
+			
+			tokens.each { token ->
+				file << token
+				file << "\t"
+				if (entity.name.contains(token)) {
+					file << entity.type
+				} else {
+					file << "0"
+				}
+				file << "\n"
+			}
+			file << "\n"
+		}
+		newPalladianNer.train("/tmp/ner_training.txt", "/tmp/nerModel_1")
+		
 		palladianNer = newPalladianNer
 	}
 }

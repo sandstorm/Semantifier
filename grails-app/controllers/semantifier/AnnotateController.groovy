@@ -59,7 +59,7 @@ class AnnotateController {
      * Learn a given annotation
      */
     def learn = {
-		def textToLearn = "Sebastian KurfŸrst is the founder of Sandstorm Media UG."
+		def textToLearn = "Sebastian Kurfï¿½rst is the founder of Sandstorm Media UG."
 		def metadata = [
 			[
 				offset: 0,
@@ -76,4 +76,8 @@ class AnnotateController {
     	learningNerService.learn(textToLearn, metadata);
     	render("learning stuff")
     }
+	
+	def train = {
+		learningNerService.rebuild()
+	}
 }

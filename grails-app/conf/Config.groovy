@@ -122,7 +122,8 @@ ner {
 	annotation {
 		languageToNerServiceMapping {
 			de = "alchemyNer"
-			en = "openCalaisNer"
+			//en = "openCalaisNer"
+			en = "learningNerService"
 		}
 	}
 	linkification {

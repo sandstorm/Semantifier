@@ -9,7 +9,7 @@ class RebuildNerJob {
 		simple name: 'periodicallyRebuildNer', startDelay: 10*1000, repeatInterval: 60*60*1000 // once every hour  
 	}
 
-	def sessionRequired = false
+	def sessionRequired = true
 	def concurrent = false
 
 	def execute() {
