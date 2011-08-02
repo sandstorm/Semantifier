@@ -1,4 +1,4 @@
-package semantifier.disambigurator
+package semantifier.linkification
 
 /*
  * This file is part of "Semantifier".
@@ -26,17 +26,17 @@ import static groovyx.net.http.ContentType.XML
 
 
 /**
- * Disambiguration service which uses Freebase.
+ * Linkification service which uses Freebase.
  */
-class DbpediaDisambiguratorService extends AbstractDisambigurator {
+class DbpediaLinkificationService extends AbstractLinkifier {
 	def grailsApplication
 	
-	public def disambigurate(Annotation annotation) {
+	public def linkify(Annotation annotation) {
 		def freebaseClient = new RESTClient('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch') // TODO: PrefixSearch -> KeywordSearch
 		def query = [QueryString: annotation.entity, MaxHits:5]
 		
-		if (annotation.mostLikelyTagName && grailsApplication.config.ner.disambiguration.dbpedia.tagMapping[annotation.mostLikelyTagName]) {
-			query['QueryClass'] = grailsApplication.config.ner.disambiguration.dbpedia.tagMapping[annotation.mostLikelyTagName]
+		if (annotation.mostLikelyTagName && grailsApplication.config.ner.linkification.dbpedia.tagMapping[annotation.mostLikelyTagName]) {
+			query['QueryClass'] = grailsApplication.config.ner.linkification.dbpedia.tagMapping[annotation.mostLikelyTagName]
 		}
 		
 		def response = freebaseClient.get(query: query, contentType: XML)

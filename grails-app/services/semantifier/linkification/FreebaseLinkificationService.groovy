@@ -1,4 +1,4 @@
-package semantifier.disambigurator
+package semantifier.linkification
 
 /*
  * This file is part of "Semantifier".
@@ -26,17 +26,17 @@ import static groovyx.net.http.ContentType.JSON
 
 
 /**
- * Disambiguration service which uses Freebase.
+ * linkification service which uses Freebase.
  */
-class FreebaseDisambiguratorService extends AbstractDisambigurator {
+class FreebaseLinkificationService extends AbstractLinkifier {
 	def grailsApplication
 	
-	public def disambigurate(Annotation annotation) {
+	public def linkify(Annotation annotation) {
 		def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
 		def query = [query: annotation.entity, limit:5, stemmed:1]
 		
-		if (annotation.mostLikelyTagName && grailsApplication.config.ner.disambiguration.freebase.tagMapping[annotation.mostLikelyTagName]) {
-			query['type'] = grailsApplication.config.ner.disambiguration.freebase.tagMapping[annotation.mostLikelyTagName]
+		if (annotation.mostLikelyTagName && grailsApplication.config.ner.linkification.freebase.tagMapping[annotation.mostLikelyTagName]) {
+			query['type'] = grailsApplication.config.ner.linkification.freebase.tagMapping[annotation.mostLikelyTagName]
 			// TODO: decide whether query type should be accounted for in all cases or not...
 			// query['type_strict'] = 'should' // give preference to matching types, but do still include other types (uses type only for boosting)
 		}

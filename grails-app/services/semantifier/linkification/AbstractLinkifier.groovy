@@ -1,4 +1,4 @@
-package semantifier.disambigurator
+package semantifier.linkification
 /*
  * This file is part of "Semantifier".
  *
@@ -20,9 +20,9 @@ package semantifier.disambigurator
 import ws.palladian.extraction.entity.ner.Annotation
 
 /**
- * Abstract base class for the disambiguration step.
+ * Abstract base class for the linkification step.
  */
-abstract class AbstractDisambigurator {
+abstract class AbstractLinkifier {
 	
 	/**
 	 * TODO: refine this method
@@ -30,5 +30,5 @@ abstract class AbstractDisambigurator {
 	 * @param annotation
 	 * @return
 	 */
-	abstract public def disambigurate(Annotation annotation);
+	abstract public def linkify(Annotation annotation);
 }

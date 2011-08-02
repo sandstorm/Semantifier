@@ -20,7 +20,7 @@ package semantifier
  */
 
 import groovyx.gpars.GParsPool
-import semantifier.disambigurator.*
+import semantifier.linkification.*
 import ws.palladian.extraction.entity.ner.Annotation
 import ws.palladian.extraction.entity.ner.Annotations
 import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER
@@ -32,7 +32,7 @@ import ws.palladian.classification.language.LanguageClassifier
  * Service which can do annotation of longer text. This annotation happens in multiple steps:
  * <ol><li>Find out the language of the input text</li>
  * <li>Determine the NER service to use using <tt>ner.annotation.languageToNerServiceMapping</tt>, and call this NER service.</li>
- * <li>Then, use the disambiguration services in the order specified by <tt>ner.disambiguration.disambigruationOrder</tt>. The first returned results will be used.</li>
+ * <li>Then, use the linkification services in the order specified by <tt>ner.linkification.linkificationOrder</tt>. The first returned results will be used.</li>
  * </ol>
  */
 class AnnotationService {
@@ -44,9 +44,9 @@ class AnnotationService {
 	OpenCalaisNER openCalaisConnector
 	AlchemyNER alchemyConnector
 	
-	AbstractDisambigurator freebaseDisambiguratorService
-	AbstractDisambigurator sindiceDisambiguratorService
-	AbstractDisambigurator dbpediaDisambiguratorService
+	AbstractLinkifier freebaseLinkificationService
+	AbstractLinkifier sindiceLinkificationService
+	AbstractLinkifier dbpediaLinkificationService
 
 	/**
 	 * Annotate the given text.
@@ -58,7 +58,7 @@ class AnnotationService {
 		def language = languageClassifier.classify(text);
 		Annotations rawAnnotations = doNamedEntityRecognition(text, language)
 
-		return [language: language, entities: disambigurateRawAnnotations(rawAnnotations)];
+		return [language: language, entities: enrichAndNormalizeRawAnnotations(rawAnnotations)];
 	}
 
 	/**
@@ -85,12 +85,12 @@ class AnnotationService {
 	}
 
 	/**
-	 * Disambigurate the raw annotations in a multi-threaded way.
+	 * Enrich the raw annotations in a multi-threaded way.
 	 * 
 	 * @param rawAnnotations
 	 * @return Map annotations
 	 */
-	private def disambigurateRawAnnotations(Annotations rawAnnotations) {
+	private def enrichAndNormalizeRawAnnotations(Annotations rawAnnotations) {
 		def processedAnnotations = []
 
 		def numberOfThreads = rawAnnotations.size()
@@ -98,54 +98,54 @@ class AnnotationService {
 		
 		GParsPool.withPool(numberOfThreads) {
 			processedAnnotations = rawAnnotations.collectParallel { annotation ->
-				return disambigurateSingleAnnotation(annotation);
+				return linkifySingleAnnotation(annotation);
 			}
 		}
 		return processedAnnotations;
 	}
 	
 	/**
-	 * Helper function which should disambigurate a single annotation.
+	 * Helper function which should linkify a single annotation.
 	 *
 	 * @param annotation
-	 * @return Map disambigurated annotation, if successful.
+	 * @return Map linkified annotation, if successful.
 	 */
-	private def disambigurateSingleAnnotation(Annotation annotation) {
-		for (String disambiguratorName in grailsApplication.config.ner.disambiguration.disambigruationOrder.tokenize(',')) {
-			AbstractDisambigurator currentDisambigurator = null;
-			switch (disambiguratorName) {
+	private def linkifySingleAnnotation(Annotation annotation) {
+		for (String linkifierName in grailsApplication.config.ner.linkification.linkificationOrder.tokenize(',')) {
+			AbstractLinkifier currentLinkifier = null;
+			switch (linkifierName) {
 				case 'freebase':
-					currentDisambigurator = freebaseDisambiguratorService
+					currentLinkifier = freebaseLinkificationService
 					break
 				case 'sindice':
-					currentDisambigurator = sindiceDisambiguratorService
+					currentLinkifier = sindiceLinkificationService
 					break
 				case 'dbpedia':
-					currentDisambigurator = dbpediaDisambiguratorService
+					currentLinkifier = dbpediaLinkificationService
 					break
 				default:
-					throw new RuntimeException("TODO: disambigurator '${disambiguratorName}' not found")
+					throw new RuntimeException("TODO: Linkifier '${linkifierName}' not found")
 			}
-			def disambigurationResult = currentDisambigurator.disambigurate(annotation)
-			if (disambigurationResult != null) {
-					// The first disambiguration result "wins".
+			def linkificationResult = currentLinkifier.linkify(annotation)
+			if (linkificationResult != null) {
+					// The first linkification result "wins".
 				return [
 					entity: annotation.entity,
 					offset: annotation.offset,
 					length: annotation.length,
 					mostLikelyTagName: annotation.mostLikelyTagName,
-					disambigurator: disambiguratorName,
-					disambiguration: disambigurationResult
+					linkifierName: linkifierName,
+					links: linkificationResult
 				]
 			}
 		}
 
-			// Fallback: No disambigurator has found anything
+			// Fallback: No linkifier has found anything
 		return [
 			entity: annotation.entity,
 			offset: annotation.offset,
 			length: annotation.length,
-			disambiguration: []
+			links: []
 		]
 	}
 }

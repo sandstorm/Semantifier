@@ -1,4 +1,4 @@
-package semantifier.disambigurator
+package semantifier.linkification
 
 /*
  * This file is part of "Semantifier".
@@ -27,19 +27,19 @@ import com.hp.hpl.jena.rdf.model.Model
 import com.hp.hpl.jena.rdf.model.ModelFactory
 
 /**
- * Disambiguration service using sindice. Mostly useful for people who are not on Freebase, but on the semantic web.
+ * Linkification service using sindice. Mostly useful for people who are not on Freebase, but on the semantic web.
  */
-class SindiceDisambiguratorService extends AbstractDisambigurator {
+class SindiceLinkificationService extends AbstractLinkifier {
 	def grailsApplication
 	
-	public def disambigurate(Annotation annotation) {
+	public def linkify(Annotation annotation) {
 		def sindiceClient = new RESTClient('http://api.sindice.com/v2/search')
 
 		def queryString = annotation.entity
 		def rdfType = null
 		
-		if (annotation.mostLikelyTagName && grailsApplication.config.ner.disambiguration.sindice.tagMapping[annotation.mostLikelyTagName]) {
-			rdfType = grailsApplication.config.ner.disambiguration.sindice.tagMapping[annotation.mostLikelyTagName]
+		if (annotation.mostLikelyTagName && grailsApplication.config.ner.linkification.sindice.tagMapping[annotation.mostLikelyTagName]) {
+			rdfType = grailsApplication.config.ner.linkification.sindice.tagMapping[annotation.mostLikelyTagName]
 			queryString += ' ' + rdfType
 		}
 		println queryString 

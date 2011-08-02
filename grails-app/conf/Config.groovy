@@ -125,8 +125,8 @@ ner {
 			en = "OpenCalais"
 		}
 	}
-	disambiguration {
-		disambigruationOrder = "dbpedia,freebase,sindice"
+	linkification {
+		linkificationOrder = "dbpedia,freebase,sindice"
 		freebase {
 			tagMapping {
 				// MAPPING from OpenCalais to Freebase terms, used to refine search results.
