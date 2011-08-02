@@ -54,11 +54,13 @@ class SindiceDisambiguratorService extends AbstractDisambigurator {
 		if (!results) return null;
 
 		return results.collect { result ->
+			def entityUrl = getEntityUrlForDocument(result.link, rdfType);
+			if (!entityUrl) return null;
 			return [
-				id: getEntityUrlForDocument(result.link, rdfType),
+				id: entityUrl,
 				name: result.title[0]
 			]
-		}
+		}.findAll { it } // filter all non-null results
 	}
 
 	public def getEntityUrlForDocument(String documentUrl, String rdfType) {
@@ -77,6 +79,6 @@ class SindiceDisambiguratorService extends AbstractDisambigurator {
 		}
 
 		def firstStatement = model.listStatements(null, model.createProperty('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'type'), model.createResource(rdfType)).next()
-		return firstStatement.subject.toString()
+		return firstStatement.subject.getURI()
 	}
 }
