@@ -40,16 +40,20 @@ class LearningNerService {
 		);
 	};
 	
-	public void learn() {
-		println "Learn called"
-		println palladianNer.getName()
+	public void learn(String textToLearn, def metadata) {
+		metadata.each { singleEntity ->
+			LearnedEntity.createNew(singleEntity.id, singleEntity.type, textToLearn, singleEntity.offset, singleEntity.length)
+		}
 	}
 	public Annotations getAnnotations(String text) {
 		return palladianNer.getAnnotations(text)
 	}
 	public void rebuild() {
-		return;
+		return; // TODO: remove this one...
 		def newPalladianNer = createNer()
+		
+		// Learn palladianNER the following facts: "type", "entityString", "surrounding"
+		
 		newPalladianNer.train(trainingPath, "/tmp/nerModel_1")
 
 		palladianNer = newPalladianNer

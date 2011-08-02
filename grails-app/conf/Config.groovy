@@ -121,12 +121,12 @@ ner {
 	
 	annotation {
 		languageToNerServiceMapping {
-			de = "Alchemy"
-			en = "OpenCalais"
+			de = "alchemyNer"
+			en = "openCalaisNer"
 		}
 	}
 	linkification {
-		linkificationOrder = "dbpedia,freebase,sindice"
+		linkificationOrder = "learning,dbpedia,sindice" // Disabled "freebase" for now
 		freebase {
 			tagMapping {
 				// MAPPING from OpenCalais to Freebase terms, used to refine search results.
@@ -172,6 +172,7 @@ ner {
 			}
 		}
 		dbpedia {
+			abortWhenResultsFound = true
 			tagMapping {
 				// MAPPING from OpenCalais to dbpedia ontology terms, used to refine search results.
 //				Anniversary = ""

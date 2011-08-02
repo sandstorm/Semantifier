@@ -30,19 +30,20 @@ import com.hp.hpl.jena.rdf.model.ModelFactory
  * Linkification service using sindice. Mostly useful for people who are not on Freebase, but on the semantic web.
  */
 class SindiceLinkificationService extends AbstractLinkifier {
-	def grailsApplication
-	
+	public String getName() {
+		return "sindice"
+	}
 	public def linkify(Annotation annotation) {
 		def sindiceClient = new RESTClient('http://api.sindice.com/v2/search')
 
 		def queryString = annotation.entity
 		def rdfType = null
 		
-		if (annotation.mostLikelyTagName && grailsApplication.config.ner.linkification.sindice.tagMapping[annotation.mostLikelyTagName]) {
-			rdfType = grailsApplication.config.ner.linkification.sindice.tagMapping[annotation.mostLikelyTagName]
+		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
+			rdfType = config.tagMapping[annotation.mostLikelyTagName]
 			queryString += ' ' + rdfType
 		}
-		println queryString 
+
 		def query = [q: queryString, page: 1, qt: 'term']
 		
 		def response = sindiceClient.get(query: query, contentType: JSON)
@@ -50,17 +51,15 @@ class SindiceLinkificationService extends AbstractLinkifier {
 	}
 	
 	private def processPossibleSindiceResults(results, rdfType) {
-			// No results found, so we return null
-		if (!results) return null;
-
 		return results.collect { result ->
 			def entityUrl = getEntityUrlForDocument(result.link, rdfType);
 			if (!entityUrl) return null;
 			return [
 				id: entityUrl,
-				name: result.title[0]
+				type: rdfType,
+				name: result.title[0],
 			]
-		}.findAll { it } // filter all non-null results
+		}.findAll { it } // only retrieve all non-null results
 	}
 
 	public def getEntityUrlForDocument(String documentUrl, String rdfType) {

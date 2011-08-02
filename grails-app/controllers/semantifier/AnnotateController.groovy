@@ -59,7 +59,21 @@ class AnnotateController {
      * Learn a given annotation
      */
     def learn = {
-    	learningNerService.learn();
+		def textToLearn = "Sebastian Kurfürst is the founder of Sandstorm Media UG."
+		def metadata = [
+			[
+				offset: 0,
+				length: 18,
+				type: 'http://xmlns.com/foaf/0.1/Person',
+				id: 'http://sebastian.kurfuerst.eu/'
+			], [
+				offset: 37,
+				length: 18,
+				type: 'http://dbpedia.org/ontology/Company',
+				id: 'http://sandstorm-media.de/' // tagged as this URL.
+			]
+		]
+    	learningNerService.learn(textToLearn, metadata);
     	render("learning stuff")
     }
 }

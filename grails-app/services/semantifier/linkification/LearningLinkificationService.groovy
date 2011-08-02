@@ -19,38 +19,25 @@ package semantifier.linkification
  * along with Semantifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import semantifier.LearnedEntity;
 import ws.palladian.extraction.entity.ner.Annotation
-import groovyx.net.http.RESTClient
-import net.sf.json.JSONNull
-import static groovyx.net.http.ContentType.XML
 
 
 /**
  * Linkification service which uses Freebase.
  */
-class DbpediaLinkificationService extends AbstractLinkifier {
+class LearningLinkificationService extends AbstractLinkifier {
 	public String getName() {
-		return "dbpedia"
+		return "learning"
 	}
 	public def linkify(Annotation annotation) {
-		def freebaseClient = new RESTClient('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch') // TODO: PrefixSearch -> KeywordSearch
-		def query = [QueryString: annotation.entity, MaxHits:5]
-		
-		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
-			query['QueryClass'] = config.tagMapping[annotation.mostLikelyTagName]
-		}
-		
-		def response = freebaseClient.get(query: query, contentType: XML)
-		return processPossibleDbpediaResults(response.data.children())
-	}
-	
-	private def processPossibleDbpediaResults(results) {
-		return results.collect { result ->
+		def result = LearnedEntity.findByName(annotation.entity).collect { learnedEntity ->
 			return [
-				id: result.URI.text(),
-				type: result.Classes.Class[0].URI.text(),
-				name:  result.Label.text()
+				id: learnedEntity.linkedDataUrl,
+				type: learnedEntity.type,
+				name: learnedEntity.name
 			]
 		}
+		return result
 	}
 }

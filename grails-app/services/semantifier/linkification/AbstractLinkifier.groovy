@@ -24,6 +24,8 @@ import ws.palladian.extraction.entity.ner.Annotation
  */
 abstract class AbstractLinkifier {
 	
+	def grailsApplication
+	
 	/**
 	 * TODO: refine this method
 	 *
@@ -31,4 +33,14 @@ abstract class AbstractLinkifier {
 	 * @return
 	 */
 	abstract public def linkify(Annotation annotation);
+	
+	abstract public String getName();
+	
+	public boolean shouldAbortWhenResultsFound() {
+		return config.abortWhenResultsFound
+	}
+	
+	public def getConfig() {
+		return grailsApplication.config.ner.linkification[this.getName()]
+	}
 }

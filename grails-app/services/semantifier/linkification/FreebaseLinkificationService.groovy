@@ -29,14 +29,15 @@ import static groovyx.net.http.ContentType.JSON
  * linkification service which uses Freebase.
  */
 class FreebaseLinkificationService extends AbstractLinkifier {
-	def grailsApplication
-	
+	public String getName() {
+		return "freebase"
+	}
 	public def linkify(Annotation annotation) {
 		def freebaseClient = new RESTClient('http://api.freebase.com/api/service/search')
 		def query = [query: annotation.entity, limit:5, stemmed:1]
 		
-		if (annotation.mostLikelyTagName && grailsApplication.config.ner.linkification.freebase.tagMapping[annotation.mostLikelyTagName]) {
-			query['type'] = grailsApplication.config.ner.linkification.freebase.tagMapping[annotation.mostLikelyTagName]
+		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
+			query['type'] = config.tagMapping[annotation.mostLikelyTagName]
 			// TODO: decide whether query type should be accounted for in all cases or not...
 			// query['type_strict'] = 'should' // give preference to matching types, but do still include other types (uses type only for boosting)
 		}
@@ -55,6 +56,7 @@ class FreebaseLinkificationService extends AbstractLinkifier {
 
 			def possibleSingleResult = [
 				id: 'http://rdf.freebase.com/ns' + result.id,
+				// TODO: return "type" information.
 				name: result.name,
 				relevanceScore: result['relevance:score']
 			]

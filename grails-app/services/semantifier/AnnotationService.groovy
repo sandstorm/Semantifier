@@ -38,15 +38,8 @@ import ws.palladian.classification.language.LanguageClassifier
 class AnnotationService {
 
 	def grailsApplication
-	
+
 	LanguageClassifier languageClassifier
-	
-	OpenCalaisNER openCalaisConnector
-	AlchemyNER alchemyConnector
-	
-	AbstractLinkifier freebaseLinkificationService
-	AbstractLinkifier sindiceLinkificationService
-	AbstractLinkifier dbpediaLinkificationService
 
 	/**
 	 * Annotate the given text.
@@ -70,18 +63,9 @@ class AnnotationService {
 	private Annotations doNamedEntityRecognition(def text, def language) {
 		Annotations annotations = []
 		def languageToNerServiceMapping = grailsApplication.config.ner.annotation.languageToNerServiceMapping
-		def annotator = languageToNerServiceMapping[language]
-		switch(annotator) {
-			case 'OpenCalais':
-				annotations = openCalaisConnector.getAnnotations(text)
-				break
-			case 'Alchemy':
-				annotations = alchemyConnector.getAnnotations(text)
-				break
-			default:
-				throw new RuntimeException("no annotator found for language " + language)
-		}
-		return annotations
+		def nerName = languageToNerServiceMapping[language]
+		def ner = grailsApplication.mainContext.getBean(nerName)
+		return ner.getAnnotations(text)
 	}
 
 	/**
@@ -111,41 +95,30 @@ class AnnotationService {
 	 * @return Map linkified annotation, if successful.
 	 */
 	private def linkifySingleAnnotation(Annotation annotation) {
-		for (String linkifierName in grailsApplication.config.ner.linkification.linkificationOrder.tokenize(',')) {
-			AbstractLinkifier currentLinkifier = null;
-			switch (linkifierName) {
-				case 'freebase':
-					currentLinkifier = freebaseLinkificationService
-					break
-				case 'sindice':
-					currentLinkifier = sindiceLinkificationService
-					break
-				case 'dbpedia':
-					currentLinkifier = dbpediaLinkificationService
-					break
-				default:
-					throw new RuntimeException("TODO: Linkifier '${linkifierName}' not found")
-			}
-			def linkificationResult = currentLinkifier.linkify(annotation)
-			if (linkificationResult != null) {
-					// The first linkification result "wins".
-				return [
-					entity: annotation.entity,
-					offset: annotation.offset,
-					length: annotation.length,
-					mostLikelyTagName: annotation.mostLikelyTagName,
-					linkifierName: linkifierName,
-					links: linkificationResult
-				]
-			}
-		}
-
-			// Fallback: No linkifier has found anything
-		return [
+		def output = [
 			entity: annotation.entity,
 			offset: annotation.offset,
 			length: annotation.length,
-			links: []
+			mostLikelyTagName: annotation.mostLikelyTagName,
 		]
+		def linkificationResults = []
+		output.links = linkificationResults
+		for (String linkifierName in grailsApplication.config.ner.linkification.linkificationOrder.tokenize(',')) {
+			AbstractLinkifier linkifier = grailsApplication.mainContext.getBean(linkifierName + 'LinkificationService')
+			if (!linkifier) throw new Exception("TODO: Linkifier ${linkifierName} not found!")
+
+			def linkificationResult = linkifier.linkify(annotation)
+			if (linkificationResult != null) {
+				linkificationResult.each {
+					it.linkifierName = linkifier.name
+				}
+				linkificationResults.addAll(linkificationResult)
+				if (linkificationResult.size() > 0 && linkifier.shouldAbortWhenResultsFound()) {
+					return output;
+				}
+			}
+		}
+
+		return output;
 	}
 }
