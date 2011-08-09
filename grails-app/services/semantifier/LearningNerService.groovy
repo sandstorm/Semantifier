@@ -55,8 +55,9 @@ class LearningNerService {
 		def newPalladianNer = createNer()
 		
 		File file = new File("/tmp/ner_training.txt")
-		
+		file.delete();
 		// Learn palladianNER the following facts: "type", "entityString", "sourceText"
+		// <http://foaf.blas/>...</http://foaf.blas/> -> Palladian converter -> Column Based
 		LearnedEntity.findAll().each { entity ->
 			def tokens = Tokenizer.tokenize(entity.sourceText)
 			println(entity.sourceText);
@@ -68,7 +69,7 @@ class LearningNerService {
 					// TODO: the check above is not very nice -> better idea: generate XML format and parse this?
 					file << entity.type
 				} else {
-					file << "0"
+					file << "O" // "O" buchstabe "Oh"
 				}
 				file << "\n"
 			}
