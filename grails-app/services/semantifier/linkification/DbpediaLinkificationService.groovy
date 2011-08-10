@@ -49,7 +49,8 @@ class DbpediaLinkificationService extends AbstractLinkifier {
 			return [
 				id: result.URI.text(),
 				type: result.Classes.Class[0].URI.text(),
-				name:  result.Label.text()
+				name:  result.Label.text(),
+				description: result.Description.text()
 			]
 		}
 	}
