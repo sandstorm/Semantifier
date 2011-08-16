@@ -35,21 +35,23 @@ class SindiceLinkificationService extends AbstractLinkifier {
 	}
 	public def linkify(Annotation annotation) {
 		def sindiceClient = new RESTClient('http://api.sindice.com/v2/search')
+		sindiceClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
+		sindiceClient.handler.failure = {}
 
 		def queryString = annotation.entity
 		def rdfType = null
-		
+
 		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
 			rdfType = config.tagMapping[annotation.mostLikelyTagName]
 			queryString += ' ' + rdfType
 		}
 
 		def query = [q: queryString, page: 1, qt: 'term']
-		
+
 		def response = sindiceClient.get(query: query, contentType: JSON)
 		return processPossibleSindiceResults(response.data.entries, rdfType)
 	}
-	
+
 	private def processPossibleSindiceResults(results, rdfType) {
 		return results.collect { result ->
 			def entityUrl = getEntityUrlForDocument(result.link, rdfType);
@@ -63,13 +65,17 @@ class SindiceLinkificationService extends AbstractLinkifier {
 	}
 
 	public def getEntityUrlForDocument(String documentUrl, String rdfType) {
+		return documentUrl; // HACK because it takes too long!
+		
 		// Graceful fallback if rdfType is not given.
 		if (!rdfType) return documentUrl;
 
 		def sindiceLiveClient = new RESTClient('http://api.sindice.com/v3/cache')
+		sindiceLiveClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
+		sindiceLiveClient.handler.failure = {}
 		def query = [url: documentUrl]
 		def response = sindiceLiveClient.get(query: query, contentType: JSON)
-		
+
 		// create an empty model
 		Model model = ModelFactory.createDefaultModel();
 

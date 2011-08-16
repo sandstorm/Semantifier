@@ -26,6 +26,7 @@ import ws.palladian.extraction.entity.ner.Annotations
 import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER
 import ws.palladian.extraction.entity.ner.tagger.AlchemyNER
 import ws.palladian.classification.language.LanguageClassifier
+import groovyx.gpars.ParallelEnhancer
 
 
 /**
@@ -49,14 +50,15 @@ class AnnotationService {
 	 * @return Map
 	 */
 	public def annotate(String text) {
+		println "Start annotation";
 		def language = languageClassifier.classify(text);
 		Annotations rawAnnotations = doNamedEntityRecognition(text, language)
-
+		println "NER finished";
 		return [language: language, entities: enrichAndNormalizeRawAnnotations(rawAnnotations)];
 	}
 
 	/**
-	 * Do named entity recognition, based on the language. 
+	 * Do named entity recognition, based on the language.
 	 * @param text
 	 * @param language
 	 * @return Annotations the annotations found
@@ -75,24 +77,27 @@ class AnnotationService {
 
 	/**
 	 * Enrich the raw annotations in a multi-threaded way.
-	 * 
+	 *
 	 * @param rawAnnotations
 	 * @return Map annotations
 	 */
 	private def enrichAndNormalizeRawAnnotations(Annotations rawAnnotations) {
+		println "Start enrichment"
 		def processedAnnotations = []
 
 		def numberOfThreads = rawAnnotations.size()
-		if (numberOfThreads > 10) numberOfThreads = 10
-		
+		if (numberOfThreads > 20) numberOfThreads = 20
+
 		GParsPool.withPool(numberOfThreads) {
 			processedAnnotations = rawAnnotations.collectParallel { annotation ->
-				return linkifySingleAnnotation(annotation);
+				def ret = linkifySingleAnnotation(annotation);
+				println "stopping linkify single"
+				return ret
 			}
 		}
 		return processedAnnotations;
 	}
-	
+
 	/**
 	 * Helper function which should linkify a single annotation.
 	 *
@@ -100,30 +105,47 @@ class AnnotationService {
 	 * @return Map linkified annotation, if successful.
 	 */
 	private def linkifySingleAnnotation(Annotation annotation) {
+		println "starting linkify single"
 		def output = [
 			entity: annotation.entity,
 			offset: annotation.offset,
 			length: annotation.length,
 			mostLikelyTagName: annotation.mostLikelyTagName,
 		]
-		def linkificationResults = []
-		output.links = linkificationResults
-		for (String linkifierName in grailsApplication.config.ner.linkification.linkificationOrder.tokenize(',')) {
-			AbstractLinkifier linkifier = grailsApplication.mainContext.getBean(linkifierName + 'LinkificationService')
-			if (!linkifier) throw new Exception("TODO: Linkifier ${linkifierName} not found!")
 
-			def linkificationResult = linkifier.linkify(annotation)
-			if (linkificationResult != null) {
-				linkificationResult.each {
-					it.linkifierName = linkifier.name
+
+		GParsPool.withPool(5) {
+			def linkificationResults = grailsApplication.config.ner.linkification.linkificationOrder.tokenize(',').collectParallel { linkifierName ->
+				println "single linkifier start " + linkifierName
+				AbstractLinkifier linkifier = grailsApplication.mainContext.getBean(linkifierName + 'LinkificationService')
+				if (!linkifier) throw new Exception("TODO: Linkifier ${linkifierName} not found!")
+
+				def linkificationResult = linkifier.linkify(annotation)
+				if (linkificationResult != null) {
+					linkificationResult.each {
+						it.linkifierName = linkifier.name
+					}
+					/*if (linkificationResult.size() > 0 && linkifier.shouldAbortWhenResultsFound()) {
+						return output;
+					}*/
+					// TODO fix that
 				}
-				linkificationResults.addAll(linkificationResult)
-				if (linkificationResult.size() > 0 && linkifier.shouldAbortWhenResultsFound()) {
-					return output;
-				}
+				println "single linkifier stop " + linkifierName
+				return linkificationResult
 			}
-		}
 
-		return output;
+			def flattenedLinkificationResults = []
+			linkificationResults.each { linkificationResult ->
+				flattenedLinkificationResults.addAll(linkificationResult)
+			}
+			output.links = flattenedLinkificationResults
+			return output
+		}
+		//for (String linkifierName in ) {
+		/*
+		}*/
+
+
+	//	return output;
 	}
 }

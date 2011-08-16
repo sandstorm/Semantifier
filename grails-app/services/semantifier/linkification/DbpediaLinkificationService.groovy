@@ -33,17 +33,24 @@ class DbpediaLinkificationService extends AbstractLinkifier {
 		return "dbpedia"
 	}
 	public def linkify(Annotation annotation) {
-		def freebaseClient = new RESTClient('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch') // TODO: PrefixSearch -> KeywordSearch
+		def dbpediaClient = new RESTClient('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch') // TODO: PrefixSearch -> KeywordSearch
+		dbpediaClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
+		dbpediaClient.handler.failure = {}
+
 		def query = [QueryString: annotation.entity, MaxHits:5]
-		
+
 		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
 			query['QueryClass'] = config.tagMapping[annotation.mostLikelyTagName]
 		}
-		
-		def response = freebaseClient.get(query: query, contentType: XML)
-		return processPossibleDbpediaResults(response.data.children())
+
+		def response = dbpediaClient.get(query: query, contentType: XML)
+		if (response.data && response.data.children()) {
+			return processPossibleDbpediaResults(response.data.children())
+		} else {
+			return [];
+		}
 	}
-	
+
 	private def processPossibleDbpediaResults(results) {
 		return results.collect { result ->
 			return [
