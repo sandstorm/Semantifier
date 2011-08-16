@@ -90,47 +90,30 @@ class AnnotationService {
 
 		GParsPool.withPool(numberOfThreads) {
 			processedAnnotations = rawAnnotations.collectParallel { annotation ->
-				def ret = linkifySingleAnnotation(annotation);
-				println "stopping linkify single"
-				return ret
+				return [
+					entity: annotation.entity,
+					offset: annotation.offset,
+					length: annotation.length,
+					mostLikelyTagName: annotation.mostLikelyTagName,
+					links: linkify(annotation.entity, annotation.mostLikelyTagName)
+				]
 			}
 		}
 		return processedAnnotations;
 	}
 
-	/**
-	 * Helper function which should linkify a single annotation.
-	 *
-	 * @param annotation
-	 * @return Map linkified annotation, if successful.
-	 */
-	private def linkifySingleAnnotation(Annotation annotation) {
-		println "starting linkify single"
-		def output = [
-			entity: annotation.entity,
-			offset: annotation.offset,
-			length: annotation.length,
-			mostLikelyTagName: annotation.mostLikelyTagName,
-		]
-
-
+	public def linkify(String text, String entityType) {
 		GParsPool.withPool(5) {
 			def linkificationResults = grailsApplication.config.ner.linkification.linkificationOrder.tokenize(',').collectParallel { linkifierName ->
-				println "single linkifier start " + linkifierName
 				AbstractLinkifier linkifier = grailsApplication.mainContext.getBean(linkifierName + 'LinkificationService')
 				if (!linkifier) throw new Exception("TODO: Linkifier ${linkifierName} not found!")
 
-				def linkificationResult = linkifier.linkify(annotation)
+				def linkificationResult = linkifier.linkify(text, entityType)
 				if (linkificationResult != null) {
 					linkificationResult.each {
 						it.linkifierName = linkifier.name
 					}
-					/*if (linkificationResult.size() > 0 && linkifier.shouldAbortWhenResultsFound()) {
-						return output;
-					}*/
-					// TODO fix that
 				}
-				println "single linkifier stop " + linkifierName
 				return linkificationResult
 			}
 
@@ -138,14 +121,8 @@ class AnnotationService {
 			linkificationResults.each { linkificationResult ->
 				flattenedLinkificationResults.addAll(linkificationResult)
 			}
-			output.links = flattenedLinkificationResults
-			return output
+
+			return flattenedLinkificationResults
 		}
-		//for (String linkifierName in ) {
-		/*
-		}*/
-
-
-	//	return output;
 	}
 }

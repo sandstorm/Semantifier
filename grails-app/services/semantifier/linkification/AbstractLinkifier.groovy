@@ -23,23 +23,23 @@ import ws.palladian.extraction.entity.ner.Annotation
  * Abstract base class for the linkification step.
  */
 abstract class AbstractLinkifier {
-	
+
 	def grailsApplication
-	
+
 	/**
 	 * TODO: refine this method
 	 *
 	 * @param annotation
 	 * @return
 	 */
-	abstract public def linkify(Annotation annotation);
-	
+	abstract public def linkify(String text, String entityType);
+
 	abstract public String getName();
-	
+
 	public boolean shouldAbortWhenResultsFound() {
 		return config.abortWhenResultsFound
 	}
-	
+
 	public def getConfig() {
 		return grailsApplication.config.ner.linkification[this.getName()]
 	}

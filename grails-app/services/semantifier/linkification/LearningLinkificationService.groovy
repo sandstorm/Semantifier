@@ -30,8 +30,8 @@ class LearningLinkificationService extends AbstractLinkifier {
 	public String getName() {
 		return "learning"
 	}
-	public def linkify(Annotation annotation) {
-		def result = LearnedEntity.findByName(annotation.entity).collect { learnedEntity ->
+	public def linkify(String text, String entityType) {
+		def result = LearnedEntity.findByName(text).collect { learnedEntity ->
 			return [
 				id: learnedEntity.linkedDataUrl,
 				type: learnedEntity.type,

@@ -32,15 +32,15 @@ class DbpediaLinkificationService extends AbstractLinkifier {
 	public String getName() {
 		return "dbpedia"
 	}
-	public def linkify(Annotation annotation) {
+	public def linkify(String text, String entityType) {
 		def dbpediaClient = new RESTClient('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch') // TODO: PrefixSearch -> KeywordSearch
 		dbpediaClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
 		dbpediaClient.handler.failure = {}
 
-		def query = [QueryString: annotation.entity, MaxHits:5]
+		def query = [QueryString: text, MaxHits:5]
 
-		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
-			query['QueryClass'] = config.tagMapping[annotation.mostLikelyTagName]
+		if (entityType && config.tagMapping[entityType]) {
+			query['QueryClass'] = config.tagMapping[entityType]
 		}
 
 		def response = dbpediaClient.get(query: query, contentType: XML)

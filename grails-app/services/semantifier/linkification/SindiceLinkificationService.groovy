@@ -33,16 +33,16 @@ class SindiceLinkificationService extends AbstractLinkifier {
 	public String getName() {
 		return "sindice"
 	}
-	public def linkify(Annotation annotation) {
+	public def linkify(String text, String entityType) {
 		def sindiceClient = new RESTClient('http://api.sindice.com/v2/search')
 		sindiceClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
 		sindiceClient.handler.failure = {}
 
-		def queryString = annotation.entity
+		def queryString = text
 		def rdfType = null
 
-		if (annotation.mostLikelyTagName && config.tagMapping[annotation.mostLikelyTagName]) {
-			rdfType = config.tagMapping[annotation.mostLikelyTagName]
+		if (entityType && config.tagMapping[entityType]) {
+			rdfType = config.tagMapping[entityType]
 			queryString += ' ' + rdfType
 		}
 
@@ -66,7 +66,7 @@ class SindiceLinkificationService extends AbstractLinkifier {
 
 	public def getEntityUrlForDocument(String documentUrl, String rdfType) {
 		return documentUrl; // HACK because it takes too long!
-		
+
 		// Graceful fallback if rdfType is not given.
 		if (!rdfType) return documentUrl;
 

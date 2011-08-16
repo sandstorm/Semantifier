@@ -26,12 +26,12 @@ import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER;
  * Controller responsible for annotating text.
  */
 class AnnotateController {
-	
+
 	/**
 	 * The annotation service doing the actual annotation work.
 	 */
 	AnnotationService annotationService
-	
+
 	LearningNerService learningNerService
 
 	/**
@@ -39,7 +39,7 @@ class AnnotateController {
 	 */
     def index = {
 		def text;
-		
+
 		if (params.lang == "de") {
 			text = "In der Politik, erst recht der Außenpolitik, sind alle Handlungen Signale. Es kommt oft weniger auf den Inhalt, als auf die Präsentation an, wenn Missverständnisse vermieden werden sollen. Erst recht, wenn ein Land anders handelt, als bisher zu erwarten war. So war es bei der Abstimmung im UN-Sicherheitsrat vor genau drei Monaten am 17. März 2011, als der Vertreter Deutschlands nicht etwa zusammen mit engen Verbündeten für einen Einsatz in Libyen votierte, sondern sich der Stimme enthielt. Flugs wurde dies weithin als grundsätzliche Kehrtwendung deutscher Außenpolitik gedeutet.Jedoch schießt diese Kritik am eigentlichen Verfehlen Berlins vorbei. Das liegt nämlich nicht darin, über die Libyen-Politik anderer Meinung gewesen zu sein als enge Verbündete. Sondern es liegt in der Ungelenktheit und Herumdruckserei, welche die Entscheidung prägte. Erst dadurch untermauerte sie den Eindruck außenpolitischer Ziellosigkeit und Gleichgültigkeit, den das Tandem Merkel-Westerwelle seit geraumer Zeit drinnen und draußen geschaffen hat. Und das eine muss vom anderen unterschieden werden, um die schon jetzt wuchernde Legendenbildung einzuhegen.";
 		} else if (params.lang == "en") {
@@ -50,14 +50,24 @@ class AnnotateController {
 		} else {
 			text = params.text
 		}
-		
+
 		response.setHeader('Access-Control-Allow-Origin', '*');
 		def annotatedText = annotationService.annotate(text)
     	render(contentType:"text/json") {
     		annotatedText
     	}
     }
-    
+
+	def linkify = {
+		// TODO: support for generic "Type"
+		response.setHeader('Access-Control-Allow-Origin', '*');
+		def links = annotationService.linkify(params.text, null);
+
+		render(contentType:"text/json") {
+    		links
+    	}
+	}
+
     /**
      * Learn a given annotation
      */
@@ -79,7 +89,7 @@ class AnnotateController {
     	learningNerService.learn(textToLearn, metadata);
     	render("learning stuff")
     }
-	
+
 	def train = {
 		learningNerService.rebuild()
 	}

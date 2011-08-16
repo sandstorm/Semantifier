@@ -33,7 +33,11 @@
 				// apply constraints here
 			}
 		}
-		
+		"/linkify" {
+			 controller = "annotate"
+			 action = "linkify"
+		}
+
 		"/"(view:"/index")
 		"500"(view:'/error')
 	}
