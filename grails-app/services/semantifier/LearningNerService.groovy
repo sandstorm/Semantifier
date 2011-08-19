@@ -3,6 +3,7 @@ package semantifier
 import ws.palladian.extraction.entity.ner.Annotations
 import ws.palladian.extraction.entity.ner.tagger.PalladianNer
 import ws.palladian.helper.nlp.Tokenizer;
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 /*
  * This file is part of "Semantifier".
@@ -55,7 +56,8 @@ class LearningNerService {
 		def newPalladianNer = createNer()
 		
 		File file = new File("/tmp/ner_training.txt")
-		file.delete();
+		file.delete()
+		file << ApplicationHolder.application.parentContext.getResource("train.txt").inputStream.text
 		// Learn palladianNER the following facts: "type", "entityString", "sourceText"
 		// <http://foaf.blas/>...</http://foaf.blas/> -> Palladian converter -> Column Based
 		LearnedEntity.findAll().each { entity ->

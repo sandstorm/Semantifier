@@ -35,7 +35,7 @@ class SindiceLinkificationService extends AbstractLinkifier {
 	}
 	public def linkify(String text, String entityType) {
 		def sindiceClient = new RESTClient('http://api.sindice.com/v2/search')
-		sindiceClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
+		sindiceClient.client.params.setParameter('http.socket.timeout', new Integer(requestTimeout));
 		sindiceClient.handler.failure = {}
 
 		def queryString = text
@@ -47,8 +47,12 @@ class SindiceLinkificationService extends AbstractLinkifier {
 		}
 
 		def query = [q: queryString, page: 1, qt: 'term']
-
-		def response = sindiceClient.get(query: query, contentType: JSON)
+		def response
+		try {
+			response = sindiceClient.get(query: query, contentType: JSON)
+		} catch (java.net.SocketTimeoutException e) {
+			return []
+		}
 		return processPossibleSindiceResults(response.data.entries, rdfType)
 	}
 
@@ -56,10 +60,13 @@ class SindiceLinkificationService extends AbstractLinkifier {
 		return results.collect { result ->
 			def entityUrl = getEntityUrlForDocument(result.link, rdfType);
 			if (!entityUrl) return null;
+			// find ASCII title, if available
+			def title = result.title.find { it.matches(/\p{ASCII}*/) }
+			
 			return [
 				id: entityUrl,
 				type: rdfType,
-				name: result.title[0],
+				name: title,
 			]
 		}.findAll { it } // only retrieve all non-null results
 	}

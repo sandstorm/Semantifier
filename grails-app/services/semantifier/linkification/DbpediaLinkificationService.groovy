@@ -34,7 +34,7 @@ class DbpediaLinkificationService extends AbstractLinkifier {
 	}
 	public def linkify(String text, String entityType) {
 		def dbpediaClient = new RESTClient('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch') // TODO: PrefixSearch -> KeywordSearch
-		dbpediaClient.client.params.setParameter('http.socket.timeout', new Integer(1500));
+		dbpediaClient.client.params.setParameter('http.socket.timeout', requestTimeout);
 		dbpediaClient.handler.failure = {}
 
 		def query = [QueryString: text, MaxHits:5]
@@ -43,11 +43,17 @@ class DbpediaLinkificationService extends AbstractLinkifier {
 			query['QueryClass'] = config.tagMapping[entityType]
 		}
 
-		def response = dbpediaClient.get(query: query, contentType: XML)
-		if (response.data && response.data.children()) {
+		def response
+		try {
+			response = dbpediaClient.get(query: query, contentType: XML)
+		} catch (java.net.SocketTimeoutException e) {
+			return []
+		}
+		
+		if (response && response.data && response.data.children()) {
 			return processPossibleDbpediaResults(response.data.children())
 		} else {
-			return [];
+			return []
 		}
 	}
 

@@ -43,4 +43,8 @@ abstract class AbstractLinkifier {
 	public def getConfig() {
 		return grailsApplication.config.ner.linkification[this.getName()]
 	}
+	
+	public def getRequestTimeout() {
+		return grailsApplication.config.ner.linkification.requestTimeout
+	}
 }
