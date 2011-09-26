@@ -30,7 +30,7 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 class LearningNerService {
 
 	volatile PalladianNer palladianNer
-	
+
 	public LearningNerService() {
 		palladianNer = createNer()
 	}
@@ -41,12 +41,26 @@ class LearningNerService {
 			ws.palladian.extraction.entity.ner.tagger.PalladianNer.TrainingMode.Sparse
 		);
 	};
-	
+
 	public void learn(String textToLearn, def metadata) {
 		metadata.each { singleEntity ->
 			LearnedEntity.createNew(singleEntity.id, singleEntity.type, textToLearn, singleEntity.offset, singleEntity.length)
 		}
 	}
+	public void learnEntity(uri, entityString, type) {
+
+		def entityWithSameUriExists = false
+
+		LearnedEntity.search(entityString, [result: 'every']).every { learnedEntity ->
+			if (learnedEntity.linkedDataUrl == uri) {
+				entityWithSameUriExists = true
+			}
+		}
+		if (!entityWithSameUriExists) {
+			LearnedEntity.createNew(uri, type, entityString, 0, entityString.length())
+		}
+	}
+
 	public Annotations getAnnotations(String text) {
 		def annotations = palladianNer.getAnnotations(text)
 		println annotations
@@ -54,7 +68,7 @@ class LearningNerService {
 	}
 	public void rebuild() {
 		def newPalladianNer = createNer()
-		
+
 		File file = new File("/tmp/ner_training.txt")
 		file.delete()
 		file << ApplicationHolder.application.parentContext.getResource("train.txt").inputStream.text
@@ -63,7 +77,7 @@ class LearningNerService {
 		LearnedEntity.findAll().each { entity ->
 			def tokens = Tokenizer.tokenize(entity.sourceText)
 			println(entity.sourceText);
-			
+
 			tokens.each { token ->
 				file << token
 				file << "\t"
@@ -78,7 +92,7 @@ class LearningNerService {
 			file << "\n"
 		}
 		newPalladianNer.train("/tmp/ner_training.txt", "/tmp/nerModel_1")
-		
+
 		palladianNer = newPalladianNer
 	}
 }

@@ -38,6 +38,11 @@
 			 action = "linkify"
 		}
 
+		"/learnEntity" {
+			 controller = "annotate"
+			 action = "learnEntity"
+		}
+
 		"/"(view:"/index")
 		"500"(view:'/error')
 	}

@@ -8,7 +8,8 @@ class LearnedEntity {
 
     static constraints = {
     }
-	
+    static searchable = true
+
 	static void createNew(String linkedDataUrl, String type, String surroundingText, int offset, int length) {
 		def entityString = surroundingText.substring(offset, offset + length)
 		def learnedEntity = new LearnedEntity(
@@ -21,7 +22,7 @@ class LearnedEntity {
 		)
 		learnedEntity.save();
 	}
-	
+
 	String name
 	String linkedDataUrl
 	String type

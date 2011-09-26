@@ -31,7 +31,7 @@ class LearningLinkificationService extends AbstractLinkifier {
 		return "learning"
 	}
 	public def linkify(String text, String entityType) {
-		def result = LearnedEntity.findByName(text).collect { learnedEntity ->
+		def result = LearnedEntity.search(text, [result: 'every']).collect { learnedEntity ->
 			return [
 				id: learnedEntity.linkedDataUrl,
 				type: learnedEntity.type,

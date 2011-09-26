@@ -38,7 +38,8 @@ class SindiceLinkificationService extends AbstractLinkifier {
 		sindiceClient.client.params.setParameter('http.socket.timeout', new Integer(requestTimeout));
 		sindiceClient.handler.failure = {}
 
-		def queryString = text
+		// Clean up the query string a little, converting "," (and later other special characters) to whitespace.
+		def queryString = text.replaceAll(/[,]./, ' ')
 		def rdfType = null
 
 		if (entityType && config.tagMapping[entityType]) {

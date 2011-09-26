@@ -59,10 +59,13 @@ class AnnotateController {
     }
 
 	def linkify = {
-		// TODO: support for generic "Type"
 		response.setHeader('Access-Control-Allow-Origin', '*');
-		def links = annotationService.linkify(params.text, null);
-
+		def links
+		if (params.type) {
+			links = annotationService.linkify(params.text, params.type);
+		} else {
+			links = annotationService.linkify(params.text, null);
+		}
 		render(contentType:"text/json") {
     		links
     	}
@@ -88,6 +91,12 @@ class AnnotateController {
 		]
     	learningNerService.learn(textToLearn, metadata);
     	render("learning stuff")
+    }
+
+    def learnEntity = {
+	    response.setHeader('Access-Control-Allow-Origin', '*');
+		learningNerService.learnEntity(params.uri, params.text, params.type)
+		render("learning stuff")
     }
 
 	def train = {
