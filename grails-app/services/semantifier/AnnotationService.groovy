@@ -26,8 +26,9 @@ import ws.palladian.extraction.entity.ner.Annotations
 import ws.palladian.extraction.entity.ner.tagger.OpenCalaisNER
 import ws.palladian.extraction.entity.ner.tagger.AlchemyNER
 import ws.palladian.classification.language.LanguageClassifier
+import ws.palladian.classification.language.PalladianLangDetect
 import groovyx.gpars.ParallelEnhancer
-
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 /**
  * Service which can do annotation of longer text. This annotation happens in multiple steps:
@@ -41,8 +42,15 @@ class AnnotationService {
 	def grailsApplication
 	def learningNerService
 
+	
 	LanguageClassifier languageClassifier
 
+	public AnnotationService() {
+		// TODO: error with palladian language classifier
+		// languageClassifier = new ws.palladian.classification.language.PalladianLangDetect(ApplicationHolder.application.parentContext.getResource("palladianLanguageJRC/palladianLanguageJRC.ser").getFile().getAbsoluteFile().toString())
+	}
+	
+	
 	/**
 	 * Annotate the given text.
 	 *
@@ -51,7 +59,8 @@ class AnnotationService {
 	 */
 	public def annotate(String text) {
 		println "Start annotation";
-		def language = languageClassifier.classify(text);
+		def language = "en" //languageClassifier.classify(text);
+		println "language classified: " + language;
 		Annotations rawAnnotations = doNamedEntityRecognition(text, language)
 		println "NER finished";
 		return [language: language, entities: enrichAndNormalizeRawAnnotations(rawAnnotations)];

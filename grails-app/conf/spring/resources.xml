@@ -31,7 +31,4 @@
 	<bean id="alchemyNer" class="ws.palladian.extraction.entity.ner.tagger.AlchemyNER">
 		<constructor-arg index="0" value="${ner.Alchemy.apiKey}" />
 	</bean>
-
-	<bean id="languageClassifier" class="ws.palladian.classification.language.TagTheNetLangDetect">
-	</bean>
  </beans>
